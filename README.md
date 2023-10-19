@@ -89,6 +89,8 @@ urlpatterns = [
 
 - Python 문법만으로도 편하게 Database를 조작하기 위해 model 제공
 
+1. 모델정의
+
 ```python
 # articles/models.py
 
@@ -121,7 +123,61 @@ AUTH_USER_MODEL = 'accounts.User'
 ```
 
 
-### 7. 앱에서 urls 관리
+2. 모델을 정의 했다면 table을 생성하기
+
+```bash
+# 적절한 table이 될 수 있도록 각종 데이터 타입들을 설정(설계도 작성)
+$ python manage.py makemigrations
+
+# 설계도 기반으로 table 작성
+$ python manage.py migrate
+
+```
+
+
+### 7. 화면 구성을 위한 BASE.HTML 만들기
+
+- 한 서비스 내의 화면 구성을 동일하게 작성하기 위해 만든다.
+
+- 매번 똑같은 코드를 반복하지 않기 위해 사용
+
+- base.html의 위치 (사용 용도에 따라 변경)
+    1. articles app의 화면 구성만을 위한 base이면 articles app 폴더에 생성
+    2. 모든 app이 공통적으로 사용할 것이면, 최상위 폴더에 생성
+
+```python
+# crud/settings.py
+
+# base파일을 찾을 수 있게 settings.py안의 TEMPLATES에 작성
+TEMPLATES = [
+    {
+        ...
+        'DIRS': [BASE_DIR / 'templates'],
+        ...
+    }
+]
+```
+
+```html
+# templates/base.html
+
+# 모든 template들이 사용할 베이스
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <!-- 각 문서마다 고유한 내용을 입력할 영역 -->
+  {% block content %}
+  {% endblock content %}
+</body>
+</html>
+```
+
+### 8. 앱에서 urls 관리
 
 ```python
 # articles/urls.py
@@ -139,4 +195,3 @@ urlpatterns = [
 ```
 
 
-### 8. 
