@@ -177,6 +177,7 @@ TEMPLATES = [
 </html>
 ```
 
+
 ### 8. 앱에서 urls 관리
 
 ```python
@@ -195,3 +196,24 @@ urlpatterns = [
 ```
 
 
+### 9. views 함수 생성
+
+```python
+# 페이지를 리턴 해줄 redirect 가져오기
+from django.shortcuts import render, redirect
+# 사용할 모델을 가져온다
+from .models import Article
+
+def main(request):
+    # 변수에 설정해놓은 모델 가져오기
+    articles = Article.objects.all().order_by('-pk')    
+    # order_by 할때
+    context = {
+        'articles': articles,
+    }
+    return render(request, 'articles/main.html', context)
+
+```
+
+
+### 10. views와 연결된 html 작성
