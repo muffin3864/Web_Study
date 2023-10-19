@@ -217,3 +217,12 @@ def main(request):
 
 
 ### 10. views와 연결된 html 작성
+```html
+<!-- articles/main.html-->
+
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Main Page</h1>
+{% endblock content %}
+```
