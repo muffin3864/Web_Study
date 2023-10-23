@@ -199,6 +199,8 @@ urlpatterns = [
 ### 9. views 함수 생성
 
 ```python
+# articles/views.py
+
 # 페이지를 리턴 해줄 redirect 가져오기
 from django.shortcuts import render, redirect
 # 사용할 모델을 가져온다
@@ -225,4 +227,122 @@ def main(request):
 {% block content %}
 <h1>Main Page</h1>
 {% endblock content %}
+```
+
+
+## 게시글 만들기
+
+### 1. create 만들기
+
+1. urls 경로 만들어주기
+
+``` python
+# articles/urls.py
+
+urlpatterns = [
+    ...
+    path('create/', views.create, name='create'),
+]
+```
+
+2. forms 만들기
+
+    - 모델을 폼으로 만들어서 가져다 쓴다.
+
+        1. articles/ 에 forms.py 파일 생성
+
+        2. 장고에서 지원하는 폼과 model.py에서 만들어놓은 구조를 가져오자
+
+            ```python
+            # articles/forms.py
+
+            from django import forms    # 장고에서 기본적으로 제공하는 폼 형태
+            from .models import Article # 모델에서 설정한 값 가져오기
+
+            class ArticleForm(forms.ModelForm):
+
+                class Meta:
+                    model = Article
+                    fields = ('title', 'content',)          # 가져올 필드만 정할 수 있다.
+                    # exclude = ('user', 'like_user',)      # 제외할 필드만 정할 수도 있음
+                    # fields = '__all__'                    # 모든 필드 가져오기
+
+            ```
+
+3. views 설정 만들기
+
+```python
+# articles/views.py
+
+from .forms import ArticleForm      # forms.py에서 만들어 놓은 형식 가져오기
+
+
+def create(request):
+    # 유저 정보 확인하고 생성
+    if request.method == 'POST':
+        form = ArticleForm(request.POST)
+        if form.is_valid():
+            article = form.save(commit=False)   # article 생성은 하지만, db에는 아직 담지 않는다
+            article.user = request.user         # user속성에 request.user 정보를 담는다
+            article.save()                      # db에 반영
+            return redirect('articles:main')    # 작성하면 메인페이지로 돌려보낸다.
+    else:
+        form = ArticleForm()
+    context = {
+        'form': form,
+    }
+    return render(request, 'articles/create.html', context)
+
+```
+
+4. html 만들기
+
+- create.html 생성
+
+```html
+<!-- articles/create.html -->
+
+{% extends "base.html" %}   <!-- base 템플릿 상속 받기 -->
+
+{% block content %}
+<h1>CREATE PAGE</h1>
+
+<!-- form 작성 -->
+<form action="{% url "articles:create" %}" method='POST'>   
+
+  {% csrf_token %}
+  {{ form.as_p }}
+  <input type="submit" value='게시글 생성'>
+
+</form>
+
+{% endblock content %}
+```
+
+- base 템플릿에서 게시글 생성 버튼 만들기
+
+```html
+
+<body>
+  ...
+  <a href="{% url "articles:create" %}">게시글 생성</a>
+  ...
+</body>
+```
+
+
+### 2. detail 페이지 만들기
+
+1. url 경로 만들어주기
+
+``` python
+# articles/urls.py
+
+urlpatterns = [
+    ...
+    # detail 페이지에선 게시글의 pk를 사용하므로 
+    # <int:article_pk>를 넣어준다.
+    path('<int:article_pk>', views.detail, name='detail'),
+    
+]
 ```
